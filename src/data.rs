@@ -11,8 +11,11 @@ impl NoteData {
     pub fn add_note<T: Into<String>>(&mut self, name: T, path: PathBuf) {
         self.notes.insert(name.into(), path);
     }
-    pub fn has_note(&mut self, name: &str) -> bool {
+    pub fn has_note(&self, name: &str) -> bool {
         self.notes.contains_key(name)
+    }
+    pub fn get_note(&self, name: &str) -> Option<&PathBuf> {
+        self.notes.get(name)
     }
 }
 

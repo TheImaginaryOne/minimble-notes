@@ -54,7 +54,7 @@ fn run(options: Options) -> anyhow::Result<()> {
         )
     })?;
     match options.subcommand {
-        SubCommand::Edit(o) => edit(o)?,
+        SubCommand::Edit(o) => edit(o, &note_data)?,
         SubCommand::New(o) => {
             new(o, &mut note_data)?;
             data::save_note_data(&note_data, &data_path).with_context(|| {
@@ -103,10 +103,16 @@ fn new(options: NewNoteOptions, note_data: &mut NoteData) -> anyhow::Result<()> 
     println!("Saved note");
     Ok(())
 }
-fn edit(options: EditNoteOptions) -> anyhow::Result<()> {
-    let editor = std::env::var("EDITOR")?;
+fn edit(options: EditNoteOptions, note_data: &NoteData) -> anyhow::Result<()> {
+    let editor = std::env::var("EDITOR").context("Editor not set")?;
 
-    let _ = Command::new(editor).status();
+    let path = note_data.get_note(&options.name)
+        .context("Note with this name does not exist")?;
+
+    let _ = Command::new(editor)
+        .arg(path)
+        .status()
+        .context("Failed to save note")?;
     println!("Saved note");
     Ok(())
 }
