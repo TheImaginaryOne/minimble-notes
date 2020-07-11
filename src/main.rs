@@ -21,7 +21,7 @@ enum SubCommand {
 }
 #[derive(Clap)]
 struct EditNoteOptions {
-    #[clap(short, long)]
+    #[clap(index(1))]
     name: String,
     #[clap(short, long)]
     filename: Option<String>,
@@ -105,8 +105,8 @@ fn show_notes(notes_dir: &Path) -> anyhow::Result<()> {
         if let Ok(file) = f {
             let file_name = &file.file_name();
             let name_path = Path::new(file_name);
-            if let Some(note_name) = name_path.file_stem() {
-                if Some("md") == name_path.extension().and_then(|i| i.to_str()) {
+            if Some("md") == name_path.extension().and_then(|i| i.to_str()) {
+                if let Some(note_name) = name_path.file_stem() {
                     println!("{}", note_name.to_string_lossy());
                 }
             }
