@@ -17,15 +17,9 @@ struct Options {
 #[derive(Clap)]
 enum SubCommand {
     Edit(EditNoteOptions),
-    New(NewNoteOptions),
 }
 #[derive(Clap)]
 struct EditNoteOptions {
-    #[clap(short, long)]
-    name: String,
-}
-#[derive(Clap)]
-struct NewNoteOptions {
     #[clap(short, long)]
     name: String,
     #[clap(short, long)]
@@ -53,9 +47,8 @@ fn run(options: Options) -> anyhow::Result<()> {
         )
     })?;
     match options.subcommand {
-        SubCommand::Edit(o) => edit(o, Path::new(&notes_dir), &note_data)?,
-        SubCommand::New(o) => {
-            new(o, Path::new(&notes_dir), &mut note_data)?;
+        SubCommand::Edit(o) => {
+            edit(o, Path::new(&notes_dir), &mut note_data)?;
             data::save_note_data(&note_data, &data_path).with_context(|| {
                 format!("Failed to write data to {}", data_path.to_string_lossy())
             })?;
@@ -63,7 +56,7 @@ fn run(options: Options) -> anyhow::Result<()> {
     }
     Ok(())
 }
-fn new(options: NewNoteOptions, notes_dir: &Path, note_data: &mut NoteData) -> anyhow::Result<()> {
+fn edit(options: EditNoteOptions, notes_dir: &Path, note_data: &mut NoteData) -> anyhow::Result<()> {
     if note_data.has_note(&options.name) {
         return Err(anyhow::anyhow!(
             "Note named \"{}\" already exists",
@@ -96,18 +89,6 @@ fn new(options: NewNoteOptions, notes_dir: &Path, note_data: &mut NoteData) -> a
             )
         })?,
     );*/
-    println!("Saved note");
-    Ok(())
-}
-fn edit(options: EditNoteOptions, notes_dir: &Path, note_data: &NoteData) -> anyhow::Result<()> {
-    let editor = std::env::var("EDITOR").context("Editor not set")?;
-
-    let path = notes_dir.join(Path::new(&(options.name + ".md")));
-
-    let _ = Command::new(editor)
-        .arg(path)
-        .status()
-        .context("Failed to save note")?;
     println!("Saved note");
     Ok(())
 }
