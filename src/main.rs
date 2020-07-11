@@ -3,8 +3,6 @@ mod data;
 use anyhow::Context;
 use clap::Clap;
 use data::NoteData;
-use directories::BaseDirs;
-use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -23,8 +21,6 @@ enum SubCommand {
 struct EditNoteOptions {
     #[clap(index(1))]
     name: String,
-    #[clap(short, long)]
-    filename: Option<String>,
     #[clap(short, long)]
     directory: Option<PathBuf>,
 }
@@ -63,12 +59,6 @@ fn edit(
     notes_dir: &Path,
     note_data: &mut NoteData,
 ) -> anyhow::Result<()> {
-    if note_data.has_note(&options.name) {
-        return Err(anyhow::anyhow!(
-            "Note named \"{}\" already exists",
-            options.name
-        ));
-    }
     let editor = std::env::var("EDITOR").context("Editor not set")?;
     let filename = options.name.clone() + ".md";
 
