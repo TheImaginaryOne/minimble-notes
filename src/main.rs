@@ -17,6 +17,7 @@ struct Options {
 #[derive(Clap)]
 enum SubCommand {
     Edit(EditNoteOptions),
+    Show,
 }
 #[derive(Clap)]
 struct EditNoteOptions {
@@ -53,10 +54,15 @@ fn run(options: Options) -> anyhow::Result<()> {
                 format!("Failed to write data to {}", data_path.to_string_lossy())
             })?;
         }
+        SubCommand::Show => show_notes(Path::new(&notes_dir))?,
     }
     Ok(())
 }
-fn edit(options: EditNoteOptions, notes_dir: &Path, note_data: &mut NoteData) -> anyhow::Result<()> {
+fn edit(
+    options: EditNoteOptions,
+    notes_dir: &Path,
+    note_data: &mut NoteData,
+) -> anyhow::Result<()> {
     if note_data.has_note(&options.name) {
         return Err(anyhow::anyhow!(
             "Note named \"{}\" already exists",
@@ -79,7 +85,7 @@ fn edit(options: EditNoteOptions, notes_dir: &Path, note_data: &mut NoteData) ->
             note_path.to_string_lossy()
         )));
     }
-/*
+    /*
     note_data.add_note(
         options.name,
         absolute_path(&note_path).with_context(|| {
@@ -90,6 +96,23 @@ fn edit(options: EditNoteOptions, notes_dir: &Path, note_data: &mut NoteData) ->
         })?,
     );*/
     println!("Saved note");
+    Ok(())
+}
+fn show_notes(notes_dir: &Path) -> anyhow::Result<()> {
+    let files = std::fs::read_dir(notes_dir)
+        .with_context(|| format!("Failed to open directory {}", notes_dir.to_string_lossy()))?;
+    for f in files {
+        if let Ok(file) = f {
+            let file_name = &file.file_name();
+            let name_path = Path::new(file_name);
+            if let Some(note_name) = name_path.file_stem() {
+                if Some("md") == name_path.extension().and_then(|i| i.to_str()) {
+                    println!("{}", note_name.to_string_lossy());
+                }
+            }
+        }
+    }
+
     Ok(())
 }
 
