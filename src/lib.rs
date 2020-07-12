@@ -28,6 +28,13 @@ pub struct RemoveNoteOptions {
     #[clap(index(1))]
     pub name: String,
 }
+#[derive(Clap)]
+pub struct RenameNoteOptions {
+    #[clap(index(1))]
+    pub name: String,
+    #[clap(index(2))]
+    pub new_name: String,
+}
 
 pub fn tag_dir(
     options: TagDirOptions,
@@ -110,6 +117,32 @@ pub fn remove(
     Ok(())
 }
 
+pub fn rename(
+    options: RenameNoteOptions,
+    notes_dir: &Path,
+    note_data: &mut NoteData,
+) -> anyhow::Result<()> {
+    let note_name = get_note_file_name(&options.name, note_data)?;
+    let note_path = get_full_path(notes_dir, &note_name, "md");
+    let new_note_path = get_full_path(notes_dir, &options.new_name, "md");
+    
+    if new_note_path.exists() {
+        anyhow::bail!(format!(
+            "Note exists at {}",
+            new_note_path.to_string_lossy()
+        ));
+    }
+
+    std::fs::rename(note_path.clone(), new_note_path)
+        .with_context(|| format!("Failed to rename {}", note_path.to_string_lossy()))?;
+
+    // Update note data as required
+    note_data.rename_note(&note_name, &options.new_name);
+
+    println!("Renamed note at {}", note_path.to_string_lossy());
+    Ok(())
+}
+
 pub fn show_notes(notes_dir: &Path) -> anyhow::Result<()> {
     let files = std::fs::read_dir(notes_dir)
         .with_context(|| format!("Failed to open directory {}", notes_dir.to_string_lossy()))?;
@@ -163,8 +196,8 @@ pub fn get_note_file_name<'a>(
     }
 }
 
-fn get_full_path(directory: &Path, name: &Cow<str>, extension: &str) -> PathBuf {
-    directory.join(Path::new(name.as_ref()).with_extension(extension))
+fn get_full_path(directory: &Path, name: &str, extension: &str) -> PathBuf {
+    directory.join(Path::new(name).with_extension(extension))
 }
 
 use path_clean::PathClean;

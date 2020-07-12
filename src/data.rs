@@ -22,6 +22,13 @@ impl NoteData {
     pub fn remove_note(&mut self, name: &str) {
         self.directory_tags.retain(|_, x| x != name);
     }
+    pub fn rename_note(&mut self, old_name: &str, new_name: &str) {
+        for (_, i) in self.directory_tags.iter_mut() {
+            if i == old_name {
+                *i = new_name.into();
+            }
+        }
+    }
 }
 
 pub fn load_note_data(path: &Path) -> anyhow::Result<NoteData> {
