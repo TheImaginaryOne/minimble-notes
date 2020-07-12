@@ -70,6 +70,7 @@ pub fn edit(
     let note_name = get_note_file_name(&options.name, note_data)?;
     let note_path = get_full_path(notes_dir, &note_name, "md");
 
+    // Open the text editor
     if !editor
         .open(&note_path)
         .context("Failed to run editor subprocess successfully")?
@@ -83,18 +84,21 @@ pub fn edit(
             note_path.to_string_lossy()
         )));
     }
-    println!("Saved note");
+    println!("Saved note to {}", note_path.to_string_lossy());
     Ok(())
 }
 
 pub fn show_notes(notes_dir: &Path) -> anyhow::Result<()> {
     let files = std::fs::read_dir(notes_dir)
         .with_context(|| format!("Failed to open directory {}", notes_dir.to_string_lossy()))?;
+    // Walk the directory
     for f in files {
         if let Ok(file) = f {
             let file_name = &file.file_name();
             let name_path = Path::new(file_name);
+            // Check if it is a .md file
             if Some("md") == name_path.extension().and_then(|i| i.to_str()) {
+                // Does it have a file stem?
                 if let Some(note_name) = name_path.file_stem() {
                     println!("{}", note_name.to_string_lossy());
                 }

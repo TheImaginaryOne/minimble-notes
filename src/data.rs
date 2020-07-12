@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
+/// Notes metadata
 #[derive(Serialize, Deserialize, Default, PartialEq, Debug)]
 pub struct NoteData {
     pub directory_tags: HashMap<PathBuf, String>,

@@ -26,6 +26,7 @@ fn main() {
 fn run(options: Options) -> anyhow::Result<()> {
     let notes_dir = std::env::var("NOTES_DIR").context("Notes directory not set")?;
 
+    // Grabs metadata, in same place as the notes directory
     let data_path = Path::new(&notes_dir).join(Path::new("minimble_data.json"));
     let mut note_data = data::load_note_data(&data_path).with_context(|| {
         format!(
