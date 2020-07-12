@@ -3,8 +3,8 @@ pub mod util;
 
 use anyhow::Context;
 use clap::Clap;
-use std::path::{Path, PathBuf};
 use std::borrow::Cow;
+use std::path::{Path, PathBuf};
 
 use data::NoteData;
 use util::EditorTrait;
@@ -12,7 +12,7 @@ use util::EditorTrait;
 #[derive(Clap)]
 pub struct TagDirOptions {
     #[clap(index(1))]
-    pub name: Option<String>,
+    pub name: String,
     #[clap(short, long, alias = "add-dir")]
     pub add_dir_tag: Option<PathBuf>,
     #[clap(long, alias = "rm-dir")]
@@ -21,7 +21,7 @@ pub struct TagDirOptions {
 #[derive(Clap)]
 pub struct EditNoteOptions {
     #[clap(index(1))]
-    pub name: Option<String>,
+    pub name: String,
 }
 
 pub fn tag_dir(
@@ -109,11 +109,12 @@ pub fn show_notes(notes_dir: &Path) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn get_note_file_name<'a>(name: &'a Option<String>, note_data: &NoteData) -> anyhow::Result<Cow<'a, str>> {
-    if let Some(name) = name {
-        Ok(Cow::Borrowed(name))
-    } else {
-        // Otherwise...
+pub fn get_note_file_name<'a>(
+    name: &'a String,
+    note_data: &NoteData,
+) -> anyhow::Result<Cow<'a, str>> {
+    // @ means the note tagged to the current or parent directory
+    if name == "@" {
         let current = std::env::current_dir().context("Failed to access current directory")?;
         let mut dir = current.into_boxed_path();
 
@@ -135,6 +136,8 @@ pub fn get_note_file_name<'a>(name: &'a Option<String>, note_data: &NoteData) ->
                 .context("No note tagged to current or parent directories")?
                 .into())
         }
+    } else {
+        Ok(Cow::Borrowed(name))
     }
 }
 

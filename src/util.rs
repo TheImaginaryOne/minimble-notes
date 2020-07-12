@@ -16,10 +16,3 @@ impl EditorTrait for Editor {
             .map(|s| s.success())
     }
 }
-pub struct MockEditor {}
-impl EditorTrait for MockEditor {
-    fn open(&self, path: &Path) -> IoResult<bool> {
-        std::fs::File::create(path)?;
-        Ok(true)
-    }
-}
