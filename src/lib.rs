@@ -23,6 +23,11 @@ pub struct EditNoteOptions {
     #[clap(index(1))]
     pub name: String,
 }
+#[derive(Clap)]
+pub struct RemoveNoteOptions {
+    #[clap(index(1))]
+    pub name: String,
+}
 
 pub fn tag_dir(
     options: TagDirOptions,
@@ -85,6 +90,23 @@ pub fn edit(
         )));
     }
     println!("Saved note to {}", note_path.to_string_lossy());
+    Ok(())
+}
+
+pub fn remove(
+    options: RemoveNoteOptions,
+    notes_dir: &Path,
+    note_data: &mut NoteData,
+) -> anyhow::Result<()> {
+    let note_name = get_note_file_name(&options.name, note_data)?;
+    let note_path = get_full_path(notes_dir, &note_name, "md");
+
+    std::fs::remove_file(note_path.clone())
+        .with_context(|| format!("Failed to delete {}", note_path.to_string_lossy()))?;
+
+    note_data.remove_note(&note_name);
+
+    println!("Removed note at {}", note_path.to_string_lossy());
     Ok(())
 }
 

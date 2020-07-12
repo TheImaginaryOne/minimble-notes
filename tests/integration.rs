@@ -48,6 +48,56 @@ fn edit_basic() -> anyhow::Result<()> {
 }
 
 #[test]
+fn remove_basic() -> anyhow::Result<()> {
+    let tmp = tempdir().unwrap();
+    let tmpp = tmp.path();
+    let mut note_data = NoteData::default();
+    edit(
+        EditNoteOptions { name: "bob".into() },
+        tmp.path(),
+        &mut note_data,
+        MockEditor {},
+    )?;
+    edit(
+        EditNoteOptions { name: "bob2".into() },
+        tmp.path(),
+        &mut note_data,
+        MockEditor {},
+    )?;
+    // Add a dir tag
+    tag_dir(
+        TagDirOptions {
+            name: "bob".into(),
+            add_dir_tag: Some(tmpp.into()),
+            remove_dir_tag: None,
+        },
+        tmpp,
+        &mut note_data,
+    )?;
+    // Add another dir tag
+    tag_dir(
+        TagDirOptions {
+            name: "bob2".into(),
+            add_dir_tag: Some(tmpp.into()),
+            remove_dir_tag: None,
+        },
+        tmpp,
+        &mut note_data,
+    )?;
+    remove(
+        RemoveNoteOptions { name: "bob".into() },
+        tmp.path(),
+        &mut note_data,
+    )?;
+    let mut b = NoteData::default();
+    b.set_dir_tag(Some("bob2"), tmpp.into());
+
+    assert_eq!(b, note_data);
+    assert_eq!(files_in_dir(&tmp.path()), vec!["bob2.md"]);
+    Ok(())
+}
+
+#[test]
 fn tag_dir_basic() -> anyhow::Result<()> {
     let tmp = tempdir().unwrap();
     let tmpp = tmp.path();

@@ -19,6 +19,9 @@ impl NoteData {
     pub fn get_dir_tag(&self, path: &Path) -> Option<&String> {
         self.directory_tags.get(path)
     }
+    pub fn remove_note(&mut self, name: &str) {
+        self.directory_tags.retain(|_, x| x != name);
+    }
 }
 
 pub fn load_note_data(path: &Path) -> anyhow::Result<NoteData> {

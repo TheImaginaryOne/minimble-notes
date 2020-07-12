@@ -1,6 +1,6 @@
 use anyhow::Context;
 use clap::Clap;
-use minimble::{data, edit, show_notes, tag_dir, util::Editor, EditNoteOptions, TagDirOptions};
+use minimble::{data, edit, show_notes, tag_dir, util::Editor, RemoveNoteOptions, remove, EditNoteOptions, TagDirOptions};
 use std::path::Path;
 
 #[derive(Clap)]
@@ -12,6 +12,8 @@ struct Options {
 #[derive(Clap)]
 enum SubCommand {
     Edit(EditNoteOptions),
+    #[clap(alias("rm"))]
+    Remove(RemoveNoteOptions),
     TagDir(TagDirOptions),
     Show,
 }
@@ -46,6 +48,7 @@ fn run(options: Options) -> anyhow::Result<()> {
             tag_dir(opts, Path::new(&notes_dir), &mut note_data)?;
         }
         SubCommand::Show => show_notes(Path::new(&notes_dir))?,
+        SubCommand::Remove(opts) => remove(opts, Path::new(&notes_dir), &mut note_data)?,
     }
     Ok(())
 }
