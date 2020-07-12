@@ -41,9 +41,6 @@ fn run(options: Options) -> anyhow::Result<()> {
         SubCommand::Edit(o) => {
             let command = std::env::var("EDITOR").context("Editor not set")?;
             edit(o, Path::new(&notes_dir), &mut note_data, Editor { command })?;
-            data::save_note_data(&note_data, &data_path).with_context(|| {
-                format!("Failed to write data to {}", data_path.to_string_lossy())
-            })?;
         }
         SubCommand::TagDir(opts) => {
             tag_dir(opts, Path::new(&notes_dir), &mut note_data)?;
@@ -52,5 +49,8 @@ fn run(options: Options) -> anyhow::Result<()> {
         SubCommand::Remove(opts) => remove(opts, Path::new(&notes_dir), &mut note_data)?,
         SubCommand::Rename(opts) => rename(opts, Path::new(&notes_dir), &mut note_data)?,
     }
+    data::save_note_data(&note_data, &data_path).with_context(|| {
+        format!("Failed to write data to {}", data_path.to_string_lossy())
+    })?;
     Ok(())
 }
