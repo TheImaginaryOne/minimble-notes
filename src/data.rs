@@ -3,28 +3,27 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct NoteData {
-    notes: HashMap<String, PathBuf>,
+    directory_tags: HashMap<PathBuf, String>,
 }
 impl NoteData {
-    pub fn add_note<T: Into<String>>(&mut self, name: T, path: PathBuf) {
-        self.notes.insert(name.into(), path);
+    pub fn set_dir_tag(&mut self, name: Option<&str>, path: PathBuf) {
+        if let Some(name) = name {
+            self.directory_tags.insert(path, name.into());
+        } else {
+            self.directory_tags.remove_entry(&path);
+        }
     }
-    pub fn has_note(&self, name: &str) -> bool {
-        self.notes.contains_key(name)
-    }
-    pub fn get_note(&self, name: &str) -> Option<&PathBuf> {
-        self.notes.get(name)
+    pub fn get_dir_tag(&self, path: &Path) -> Option<&String> {
+        self.directory_tags.get(path)
     }
 }
 
 pub fn load_note_data(path: &Path) -> anyhow::Result<NoteData> {
     match File::open(path) {
         Ok(f) => Ok(serde_json::from_reader(f)?),
-        Err(_) => Ok(NoteData {
-            notes: HashMap::new(),
-        }),
+        Err(_) => Ok(Default::default()),
     }
 }
 pub fn save_note_data(note_data: &NoteData, path: &Path) -> anyhow::Result<()> {
