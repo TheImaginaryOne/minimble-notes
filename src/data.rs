@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, PartialEq, Debug)]
 pub struct NoteData {
-    directory_tags: HashMap<PathBuf, String>,
+    pub directory_tags: HashMap<PathBuf, String>,
 }
 impl NoteData {
     pub fn set_dir_tag(&mut self, name: Option<&str>, path: PathBuf) {

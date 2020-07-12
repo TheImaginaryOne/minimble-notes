@@ -1,6 +1,6 @@
 use anyhow::Context;
 use clap::Clap;
-use minimble::{data, edit, show_notes, util::Editor, EditNoteOptions};
+use minimble::{data, edit, show_notes, tag_dir, util::Editor, EditNoteOptions, TagDirOptions};
 use std::path::Path;
 
 #[derive(Clap)]
@@ -12,6 +12,7 @@ struct Options {
 #[derive(Clap)]
 enum SubCommand {
     Edit(EditNoteOptions),
+    TagDir(TagDirOptions),
     Show,
 }
 fn main() {
@@ -39,6 +40,9 @@ fn run(options: Options) -> anyhow::Result<()> {
             data::save_note_data(&note_data, &data_path).with_context(|| {
                 format!("Failed to write data to {}", data_path.to_string_lossy())
             })?;
+        }
+        SubCommand::TagDir(opts) => {
+            tag_dir(opts, Path::new(&notes_dir), &mut note_data)?;
         }
         SubCommand::Show => show_notes(Path::new(&notes_dir))?,
     }
