@@ -1,6 +1,6 @@
 use anyhow::Context;
 use clap::Clap;
-use minimble::{data, edit, rename, show_notes, tag_dir, util::Editor, RemoveNoteOptions, remove, EditNoteOptions, RenameNoteOptions, TagDirOptions};
+use minimble::{data, edit, rename, show_notes, tag_dir, util::Editor, RemoveNoteOptions, remove, EditNoteOptions, RenameNoteOptions, TagDirOptions, ShowNoteOptions};
 use std::io::Write;
 use std::path::Path;
 
@@ -17,7 +17,7 @@ enum SubCommand {
     Remove(RemoveNoteOptions),
     Rename(RenameNoteOptions),
     TagDir(TagDirOptions),
-    Show,
+    Show(ShowNoteOptions),
 }
 fn main() {
     if let Err(e) = run(Options::parse()) {
@@ -46,7 +46,7 @@ fn run(options: Options) -> anyhow::Result<()> {
         SubCommand::TagDir(opts) => {
             tag_dir(opts, Path::new(&notes_dir), &mut note_data)?;
         }
-        SubCommand::Show => show_notes(Path::new(&notes_dir))?,
+        SubCommand::Show(opts) => show_notes(opts, Path::new(&notes_dir), &mut note_data)?,
         SubCommand::Remove(opts) => {
             let mut response = String::new();
             print!("Are you sure you want to remove the file?\n(y = confirm, else abort): ");

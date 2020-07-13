@@ -5,6 +5,7 @@ use anyhow::Context;
 use clap::Clap;
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
+use std::io::Write;
 
 use data::NoteData;
 use util::EditorTrait;
@@ -27,6 +28,11 @@ pub struct EditNoteOptions {
 pub struct RemoveNoteOptions {
     #[clap(index(1))]
     pub name: String,
+}
+#[derive(Clap)]
+pub struct ShowNoteOptions {
+    #[clap(index(1))]
+    pub name: Option<String>,
 }
 #[derive(Clap)]
 pub struct RenameNoteOptions {
@@ -143,19 +149,30 @@ pub fn rename(
     Ok(())
 }
 
-pub fn show_notes(notes_dir: &Path) -> anyhow::Result<()> {
-    let files = std::fs::read_dir(notes_dir)
-        .with_context(|| format!("Failed to open directory {}", notes_dir.to_string_lossy()))?;
-    // Walk the directory
-    for f in files {
-        if let Ok(file) = f {
-            let file_name = &file.file_name();
-            let name_path = Path::new(file_name);
-            // Check if it is a .md file
-            if Some("md") == name_path.extension().and_then(|i| i.to_str()) {
-                // Does it have a file stem?
-                if let Some(note_name) = name_path.file_stem() {
-                    println!("{}", note_name.to_string_lossy());
+pub fn show_notes(options: ShowNoteOptions, notes_dir: &Path, note_data: &mut NoteData) -> anyhow::Result<()> {
+    if let Some(name) = options.name {
+        let note_name = get_note_file_name(&name, note_data)?;
+        let note_path = get_full_path(notes_dir, &note_name, "md");
+
+        let mut file = std::fs::File::open(note_path.clone())
+            .with_context(|| format!("Failed to open file at {}", note_path.to_string_lossy()))?;
+        let mut stdout = std::io::stdout();
+
+        std::io::copy(&mut file, &mut stdout)?;
+    } else {
+        let files = std::fs::read_dir(notes_dir)
+            .with_context(|| format!("Failed to open directory {}", notes_dir.to_string_lossy()))?;
+        // Walk the directory
+        for f in files {
+            if let Ok(file) = f {
+                let file_name = &file.file_name();
+                let name_path = Path::new(file_name);
+                // Check if it is a .md file
+                if Some("md") == name_path.extension().and_then(|i| i.to_str()) {
+                    // Does it have a file stem?
+                    if let Some(note_name) = name_path.file_stem() {
+                        println!("{}", note_name.to_string_lossy());
+                    }
                 }
             }
         }
