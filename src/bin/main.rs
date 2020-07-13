@@ -1,6 +1,7 @@
 use anyhow::Context;
 use clap::Clap;
 use minimble::{data, edit, rename, show_notes, tag_dir, util::Editor, RemoveNoteOptions, remove, EditNoteOptions, RenameNoteOptions, TagDirOptions};
+use std::io::Write;
 use std::path::Path;
 
 #[derive(Clap)]
@@ -46,7 +47,17 @@ fn run(options: Options) -> anyhow::Result<()> {
             tag_dir(opts, Path::new(&notes_dir), &mut note_data)?;
         }
         SubCommand::Show => show_notes(Path::new(&notes_dir))?,
-        SubCommand::Remove(opts) => remove(opts, Path::new(&notes_dir), &mut note_data)?,
+        SubCommand::Remove(opts) => {
+            let mut response = String::new();
+            print!("Are you sure you want to remove the file?\n(y = confirm, else abort): ");
+            std::io::stdout().flush()?;
+            std::io::stdin().read_line(&mut response)?;
+            if response.trim() == "y" {
+                remove(opts, Path::new(&notes_dir), &mut note_data)?
+            } else {
+                println!("Delete aborted");
+            }
+        }
         SubCommand::Rename(opts) => rename(opts, Path::new(&notes_dir), &mut note_data)?,
     }
     data::save_note_data(&note_data, &data_path).with_context(|| {
