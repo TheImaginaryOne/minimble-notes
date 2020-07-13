@@ -69,7 +69,10 @@ fn rename_basic() -> anyhow::Result<()> {
         &mut note_data,
     )?;
     rename(
-        RenameNoteOptions { name: "bob".into(), new_name: "bob2".into() },
+        RenameNoteOptions {
+            name: "bob".into(),
+            new_name: "bob2".into(),
+        },
         tmp.path(),
         &mut note_data,
     )?;
@@ -93,7 +96,9 @@ fn remove_basic() -> anyhow::Result<()> {
         MockEditor {},
     )?;
     edit(
-        EditNoteOptions { name: "bob2".into() },
+        EditNoteOptions {
+            name: "bob2".into(),
+        },
         tmp.path(),
         &mut note_data,
         MockEditor {},

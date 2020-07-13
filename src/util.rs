@@ -11,7 +11,7 @@ pub struct Editor {
 impl EditorTrait for Editor {
     fn open(&self, path: &Path) -> IoResult<bool> {
         Command::new(self.command.clone())
-            .arg(path.clone())
+            .arg(path)
             .status()
             .map(|s| s.success())
     }

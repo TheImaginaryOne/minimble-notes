@@ -1,6 +1,9 @@
 use anyhow::Context;
 use clap::Clap;
-use minimble::{data, edit, rename, show_notes, tag_dir, util::Editor, RemoveNoteOptions, remove, EditNoteOptions, RenameNoteOptions, TagDirOptions, ShowNoteOptions};
+use minimble::{
+    data, edit, remove, rename, show, tag_dir, util::Editor, EditNoteOptions,
+    RemoveNoteOptions, RenameNoteOptions, ShowNoteOptions, TagDirOptions,
+};
 use std::io::Write;
 use std::path::Path;
 
@@ -46,7 +49,7 @@ fn run(options: Options) -> anyhow::Result<()> {
         SubCommand::TagDir(opts) => {
             tag_dir(opts, Path::new(&notes_dir), &mut note_data)?;
         }
-        SubCommand::Show(opts) => show_notes(opts, Path::new(&notes_dir), &mut note_data)?,
+        SubCommand::Show(opts) => show(opts, Path::new(&notes_dir), &mut note_data)?,
         SubCommand::Remove(opts) => {
             let mut response = String::new();
             print!("Are you sure you want to remove the file?\n(y = confirm, else abort): ");
@@ -60,8 +63,7 @@ fn run(options: Options) -> anyhow::Result<()> {
         }
         SubCommand::Rename(opts) => rename(opts, Path::new(&notes_dir), &mut note_data)?,
     }
-    data::save_note_data(&note_data, &data_path).with_context(|| {
-        format!("Failed to write data to {}", data_path.to_string_lossy())
-    })?;
+    data::save_note_data(&note_data, &data_path)
+        .with_context(|| format!("Failed to write data to {}", data_path.to_string_lossy()))?;
     Ok(())
 }

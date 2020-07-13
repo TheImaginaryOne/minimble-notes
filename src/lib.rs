@@ -5,7 +5,6 @@ use anyhow::Context;
 use clap::Clap;
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
-use std::io::Write;
 
 use data::NoteData;
 use util::EditorTrait;
@@ -131,7 +130,7 @@ pub fn rename(
     let note_name = get_note_file_name(&options.name, note_data)?;
     let note_path = get_full_path(notes_dir, &note_name, "md");
     let new_note_path = get_full_path(notes_dir, &options.new_name, "md");
-    
+
     if new_note_path.exists() {
         anyhow::bail!(format!(
             "Note exists at {}",
@@ -149,7 +148,11 @@ pub fn rename(
     Ok(())
 }
 
-pub fn show_notes(options: ShowNoteOptions, notes_dir: &Path, note_data: &mut NoteData) -> anyhow::Result<()> {
+pub fn show(
+    options: ShowNoteOptions,
+    notes_dir: &Path,
+    note_data: &mut NoteData,
+) -> anyhow::Result<()> {
     if let Some(name) = options.name {
         let note_name = get_note_file_name(&name, note_data)?;
         let note_path = get_full_path(notes_dir, &note_name, "md");
@@ -182,7 +185,7 @@ pub fn show_notes(options: ShowNoteOptions, notes_dir: &Path, note_data: &mut No
 }
 
 pub fn get_note_file_name<'a>(
-    name: &'a String,
+    name: &'a str,
     note_data: &NoteData,
 ) -> anyhow::Result<Cow<'a, str>> {
     // @ means the note tagged to the current or parent directory
