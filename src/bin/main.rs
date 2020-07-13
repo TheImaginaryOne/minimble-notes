@@ -15,9 +15,11 @@ struct Options {
 }
 #[derive(Clap)]
 enum SubCommand {
+    #[clap(alias("ed"))]
     Edit(EditNoteOptions),
     #[clap(alias("rm"))]
     Remove(RemoveNoteOptions),
+    #[clap(alias("mv"))]
     Rename(RenameNoteOptions),
     TagDir(TagDirOptions),
     Show(ShowNoteOptions),
