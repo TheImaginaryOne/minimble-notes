@@ -174,7 +174,23 @@ pub fn show(
                 if Some("md") == name_path.extension().and_then(|i| i.to_str()) {
                     // Does it have a file stem?
                     if let Some(note_name) = name_path.file_stem() {
-                        println!("{}", note_name.to_string_lossy());
+                        let dir_list = note_data
+                            .directory_tags
+                            .iter()
+                            .filter_map(|(key, val)| {
+                                if &val[..] == note_name {
+                                    Some(key.to_string_lossy())
+                                } else {
+                                    None
+                                }
+                            })
+                            .collect::<Vec<_>>();
+
+                        if dir_list.len() > 0 {
+                            println!("{} ({})", note_name.to_string_lossy(), dir_list.join(", "));
+                        } else {
+                            println!("{}", note_name.to_string_lossy());
+                        }
                     }
                 }
             }
@@ -184,10 +200,7 @@ pub fn show(
     Ok(())
 }
 
-pub fn get_note_file_name<'a>(
-    name: &'a str,
-    note_data: &NoteData,
-) -> anyhow::Result<Cow<'a, str>> {
+pub fn get_note_file_name<'a>(name: &'a str, note_data: &NoteData) -> anyhow::Result<Cow<'a, str>> {
     // @ means the note tagged to the current or parent directory
     if name == "@" {
         let current = std::env::current_dir().context("Failed to access current directory")?;

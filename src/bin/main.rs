@@ -1,8 +1,8 @@
 use anyhow::Context;
 use clap::Clap;
 use minimble::{
-    data, edit, remove, rename, show, tag_dir, util::Editor, EditNoteOptions,
-    RemoveNoteOptions, RenameNoteOptions, ShowNoteOptions, TagDirOptions,
+    data, edit, remove, rename, show, tag_dir, util::Editor, EditNoteOptions, RemoveNoteOptions,
+    RenameNoteOptions, ShowNoteOptions, TagDirOptions,
 };
 use std::io::Write;
 use std::path::Path;
